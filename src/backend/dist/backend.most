@@ -1,0 +1,91 @@
+// Version: 1.0.0
+type ContactSubmission__390548495 =
+  {email : Text; message : Text; timestamp : Time__900049286};
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type ExternalBlob__671167343 = Blob;
+type Int__270357528 = Int__616954475;
+type Int__616954475 = Int;
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type Map__158565046<K, V> = Map__297112838<K, V>;
+type Map__297112838<K, V> =
+  {var root : Node__46230540<K, V>; var size : Nat__490723111};
+type Map__605269027<K, V> = Map__158565046<K, V>;
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type Order__762448211 =
+  {
+    amount : Nat;
+    id : Text;
+    products : [Text];
+    status : Text;
+    stripeSessionId : ?Text;
+    timestamp : Time__900049286;
+    user : Principal
+  };
+type Product__853085059 =
+  {
+    currency : Text;
+    description : Text;
+    id : Text;
+    images : [ExternalBlob__671167343];
+    isAvailable : Bool;
+    name : Text;
+    price : Nat;
+    specifications : [(Text, Text)]
+  };
+type Project__762223144 =
+  {
+    description : Text;
+    githubLink : Text;
+    id : Text;
+    image : ExternalBlob__671167343;
+    isActive : Bool;
+    name : Text;
+    technologies : [Text]
+  };
+type StripeConfiguration__87721349 =
+  {allowedCountries : [Text]; secretKey : Text};
+type Time__796480547 = Int__270357528;
+type Time__900049286 = Time__796480547;
+type UserProfile__491224006 = {name : Text};
+type UserRole__1073662873 = {#admin; #guest; #user};
+actor {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1073662873>
+    };
+  stable contactSubmissions :
+    {
+      var root : Node__46230540<Text, ContactSubmission__390548495>;
+      var size : Nat__490723111
+    };
+  stable orders :
+    {
+      var root : Node__46230540<Text, Order__762448211>;
+      var size : Nat__490723111
+    };
+  stable products :
+    {
+      var root : Node__46230540<Text, Product__853085059>;
+      var size : Nat__490723111
+    };
+  stable projects :
+    {
+      var root : Node__46230540<Text, Project__762223144>;
+      var size : Nat__490723111
+    };
+  stable sessionOwners :
+    {var root : Node__46230540<Text, Principal>; var size : Nat__490723111};
+  stable var stripeConfig : ?StripeConfiguration__87721349;
+  stable userProfiles :
+    {
+      var root : Node__46230540<Principal, UserProfile__491224006>;
+      var size : Nat__490723111
+    }
+};
