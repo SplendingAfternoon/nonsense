@@ -21,25 +21,19 @@ export default function NavBar({ scrolled }: NavBarProps) {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-14"
+        className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-14${
+          scrolled ? " nav-scrolled" : ""
+        }`}
         style={{
-          background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          transition: "background 300ms ease, backdrop-filter 300ms ease",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+          background: scrolled ? undefined : "transparent",
+          transition: "none",
         }}
       >
         {/* Left: logo + wordmark */}
         <button
           type="button"
           onClick={() => smoothScrollTo("hero")}
-          className="flex items-center gap-3 focus-visible:outline-[2px] focus-visible:outline-solid focus-visible:outline-[#9e1a1a]"
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-          }}
+          className="flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-[#9e1a1a] bg-transparent border-none p-0 cursor-pointer"
         >
           <img
             className="logo-sigil nav-sigil"
@@ -48,11 +42,11 @@ export default function NavBar({ scrolled }: NavBarProps) {
             style={{ height: "28px", width: "28px", objectFit: "contain" }}
           />
           <span
+            className="uppercase"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: "12px",
               letterSpacing: "0.3em",
-              textTransform: "uppercase",
               color: "#e8e4de",
             }}
           >
@@ -61,31 +55,19 @@ export default function NavBar({ scrolled }: NavBarProps) {
         </button>
 
         {/* Right: nav links — hidden below 600px */}
-        <ul
-          className="flex items-center gap-8 list-none m-0 p-0"
-          style={{ fontFamily: "'DM Sans', sans-serif" }}
-        >
+        <ul className="flex items-center gap-8 list-none m-0 p-0">
           {navLinks.map((link) => (
             <li key={link.id} className="hidden sm:block">
               <button
                 type="button"
                 onClick={() => smoothScrollTo(link.id)}
-                className="nav-link-btn"
+                className="nav-link-btn menu-link bg-transparent border-none p-1 cursor-pointer text-[#e8e4de]"
                 style={{
-                  background: "none",
-                  border: "none",
-                  padding: "4px 0",
+                  fontFamily: "'DM Sans', sans-serif",
                   fontSize: "13px",
                   letterSpacing: "0.05em",
-                  color: "#e8e4de",
-                  cursor: "pointer",
-                  transition: "color 200ms ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#9e1a1a";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#e8e4de";
+                  transition: "none",
+                  minHeight: "44px",
                 }}
               >
                 {link.label}

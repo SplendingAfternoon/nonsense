@@ -26,6 +26,25 @@ const ITEMS = [
 
 export default function TechnologySection() {
   const [openSection, setOpenSection] = useState<string | null>(ITEMS[0].title);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.05 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const toggleSection = (title: string) => {
     setOpenSection((current) => (current === title ? null : title));
@@ -34,33 +53,35 @@ export default function TechnologySection() {
   return (
     <section
       id="technology"
+      ref={sectionRef}
       data-ocid="technology.section"
-      style={{ padding: "6rem 0" }}
+      className="pt-10 pb-24"
+      style={{
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity",
+      }}
     >
-      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 2rem" }}>
+      <div className="max-w-7xl mx-auto px-8">
         <h2
-          style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(24px, 3vw, 32px)",
-            textTransform: "uppercase",
-            color: "#e8e4de",
-            textAlign: "center",
-            marginBottom: "3rem",
-            letterSpacing: "0.1em",
-            fontWeight: 500,
-          }}
+          className="font-serif uppercase text-[#e8e4de] text-left mb-8 tracking-[0.1em] font-medium"
+          style={{ fontSize: "clamp(24px, 3vw, 32px)" }}
         >
           <GlitchText text="TECHNOLOGY" durationMs={180} />
         </h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {/* Monolithic blueprint grid — adjacent items share borders, no gap */}
+        <div
+          className="border border-[#111111]"
+          style={{ outline: "1px solid #111111" }}
+        >
           {ITEMS.map((item, index) => (
             <TechItem
               key={item.title}
               item={item}
               isOpen={openSection === item.title}
               onToggle={() => toggleSection(item.title)}
-              index={index}
+              isLast={index === ITEMS.length - 1}
             />
           ))}
         </div>
@@ -73,64 +94,49 @@ interface TechItemProps {
   item: { title: string; content: string };
   isOpen: boolean;
   onToggle: () => void;
-  index: number;
+  isLast: boolean;
 }
 
-function TechItem({ item, isOpen, onToggle }: TechItemProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState(0);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight);
-    }
-  }, []);
-
+function TechItem({ item, isOpen, onToggle, isLast }: TechItemProps) {
   return (
     <div
+      className="bg-[#0a0a0a] p-6"
       style={{
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
+        borderBottom: isLast ? "none" : "1px solid #111111",
+        transition: "none",
       }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "#9e1a1a";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "#111111";
+      }}
+      data-ocid={`technology.item.${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
     >
       <button
         type="button"
         aria-expanded={isOpen}
         aria-controls={`tech-panel-${item.title}`}
         onClick={onToggle}
-        data-ocid={`technology.item.${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
-        style={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "1.25rem 0",
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: "16px",
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          color: "#e8e4de",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-        }}
-        onFocus={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.outline =
-            "2px solid #9e1a1a";
-        }}
-        onBlur={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.outline = "none";
-        }}
+        className="flex w-full justify-between items-start gap-4 font-serif text-[14px] uppercase tracking-[0.08em] text-[#e8e4de] bg-transparent border-none cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e1a1a] mb-0"
       >
-        <span>{item.title}</span>
         <span
+          className="text-left"
+          style={{
+            fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+            fontSize: "12px",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#e8e4de",
+          }}
+        >
+          {item.title}
+        </span>
+        <span
+          className="text-[#9e1a1a] shrink-0 leading-none"
           style={{
             fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "18px",
-            color: "#9e1a1a",
-            flexShrink: 0,
-            marginLeft: "1rem",
-            lineHeight: 1,
+            fontSize: "14px",
           }}
         >
           {isOpen ? "\u2212" : "+"}
@@ -140,23 +146,14 @@ function TechItem({ item, isOpen, onToggle }: TechItemProps) {
       <section
         id={`tech-panel-${item.title}`}
         aria-label={item.title}
-        style={{
-          overflow: "hidden",
-          maxHeight: isOpen ? `${contentHeight}px` : "0px",
-          opacity: isOpen ? 1 : 0,
-          transition: "max-height 300ms ease, opacity 250ms ease",
-        }}
+        className={
+          isOpen
+            ? "tech-content-open overflow-hidden"
+            : "tech-content-closed overflow-hidden"
+        }
       >
-        <div ref={contentRef} style={{ paddingBottom: "1.25rem" }}>
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "15px",
-              lineHeight: "1.7",
-              color: "#7a7570",
-              margin: 0,
-            }}
-          >
+        <div className="pt-4">
+          <p className="font-sans text-[14px] leading-[1.6] text-[#7a7570] m-0 text-left">
             {item.content}
           </p>
         </div>

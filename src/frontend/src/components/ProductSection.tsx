@@ -35,42 +35,24 @@ const SPECS = [
 
 export default function ProductSection() {
   return (
-    <section
-      id="products"
-      data-ocid="products.section"
-      style={{ padding: "6rem 0" }}
-    >
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 2rem" }}>
+    <section id="products" data-ocid="products.section" className="py-20">
+      <div className="max-w-7xl mx-auto px-8">
         <h2
-          style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(24px, 3vw, 32px)",
-            textTransform: "uppercase",
-            color: "#e8e4de",
-            textAlign: "center",
-            marginBottom: "4rem",
-            letterSpacing: "0.1em",
-            fontWeight: 500,
-          }}
+          className="font-serif uppercase text-[#e8e4de] text-left mb-12 tracking-[0.1em] font-medium"
+          style={{ fontSize: "clamp(24px, 3vw, 32px)" }}
         >
           <GlitchText text="PRODUCTS" durationMs={180} />
         </h2>
 
-        {PRODUCTS.map((product, index) => (
-          <div key={product.id}>
-            <ProductCard product={product} index={index} />
-            {index < PRODUCTS.length - 1 && (
-              <hr
-                style={{
-                  border: "none",
-                  borderTop: "1px solid #9e1a1a",
-                  margin: "3rem 0",
-                  width: "100%",
-                }}
-              />
-            )}
-          </div>
-        ))}
+        {/* Monolithic border grid — cards share borders, no gaps */}
+        <div
+          className="grid grid-cols-1"
+          style={{ border: "1px solid #111111" }}
+        >
+          {PRODUCTS.map((product, index) => (
+            <ProductCard key={product.id} product={product} index={index} />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -92,7 +74,6 @@ function ProductCard({ product, index }: ProductCardProps) {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
             observer.disconnect();
           }
         }
@@ -103,137 +84,74 @@ function ProductCard({ product, index }: ProductCardProps) {
     return () => observer.disconnect();
   }, []);
 
-  const isEven = index % 2 === 0;
-
   return (
     <div
       ref={cardRef}
       data-ocid={`products.item.${index + 1}`}
+      className="grid grid-cols-1 md:grid-cols-2"
       style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "2rem",
         opacity: 0,
-        transform: "translateY(16px)",
-        transition: "opacity 500ms ease, transform 500ms ease",
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity",
+        borderTop: index > 0 ? "1px solid #111111" : undefined,
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "#9e1a1a";
+        (e.currentTarget as HTMLDivElement).style.borderTopColor = "#9e1a1a";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = "";
+        (e.currentTarget as HTMLDivElement).style.borderTopColor =
+          index > 0 ? "#111111" : "";
       }}
     >
-      <style>{`
-        @media (min-width: 768px) {
-          .product-row-${index} {
-            flex-direction: ${isEven ? "row" : "row-reverse"} !important;
-          }
-        }
-      `}</style>
-      <div
-        className={`product-row-${index}`}
-        style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
-      >
-        {/* Image side */}
-        <div style={{ flex: "0 0 55%", minWidth: 0 }}>
-          <img
-            className="product-img"
-            src={product.image}
-            alt={product.alt}
-            style={{
-              width: "100%",
-              aspectRatio: "4/3",
-              objectFit: "cover",
-              display: "block",
-            }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                "/assets/placeholder.svg";
-            }}
-          />
-        </div>
+      {/* Image side */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#111111]">
+        <img
+          src={product.image}
+          alt={product.alt}
+          className="absolute inset-0 w-full h-full object-cover block"
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            img.style.display = "none";
+          }}
+        />
+      </div>
 
-        {/* Text side */}
-        <div
+      {/* Text side */}
+      <div
+        className="flex flex-col justify-center p-8"
+        style={{ borderLeft: "1px solid #111111" }}
+      >
+        <h3 className="font-serif text-[22px] uppercase tracking-[0.1em] text-[#e8e4de] mb-2 font-medium text-left">
+          {product.name}
+        </h3>
+        <p className="font-sans text-[16px] leading-[1.6] text-[#7a7570] mb-4 text-left">
+          {product.description}
+        </p>
+
+        {/* Price — 11px JetBrains Mono, tracking-[0.2em], uppercase, red */}
+        <p
+          className="mb-6 text-left"
           style={{
-            flex: "0 0 45%",
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
+            fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+            fontSize: "11px",
+            letterSpacing: "0.2em",
+            color: "#9e1a1a",
+            textTransform: "uppercase",
           }}
         >
-          <h3
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "22px",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              color: "#e8e4de",
-              marginBottom: "0.5rem",
-              fontWeight: 500,
-            }}
-          >
-            {product.name}
-          </h3>
-          <p
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "14px",
-              color: "#7a7570",
-              marginBottom: "1rem",
-            }}
-          >
-            {product.description}
-          </p>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "20px",
-              color: "#9e1a1a",
-              marginBottom: "1.5rem",
-              letterSpacing: "0.05em",
-            }}
-          >
-            £159.00
-          </p>
+          £159.00
+        </p>
 
-          {/* Spec table */}
-          <div
-            style={{
-              borderTop: "1px solid #9e1a1a",
-              paddingTop: "1rem",
-              width: "100%",
-            }}
-          >
-            {SPECS.map((spec) => (
-              <div
-                key={spec.label}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "6px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "11px",
-                    color: "#7a7570",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {spec.label}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "13px",
-                    color: "#e8e4de",
-                  }}
-                >
-                  {spec.value}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Spec table — red divider rows, sharp data-dense layout */}
+        <div className="w-full" style={{ borderTop: "1px solid #9e1a1a" }}>
+          {SPECS.map((spec) => (
+            <div key={spec.label} className="spec-row">
+              <span className="spec-label">{spec.label}</span>
+              <span className="spec-value">{spec.value}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

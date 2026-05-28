@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-
 const smoothScrollTo = (id: string) => {
   const prefersReduced = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
@@ -13,133 +11,45 @@ export default function Hero() {
     <section
       id="hero"
       data-ocid="hero.section"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
-      }}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* Background sigil */}
       <img
-        className="hero-sigil"
+        className="hero-sigil absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-auto pointer-events-none"
         src="/assets/eye-star.png"
         alt=""
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "clamp(300px, 40vw, 500px)",
-          height: "auto",
-          opacity: 0.06,
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
+        style={{ width: "clamp(300px, 40vw, 500px)", opacity: 0.06, zIndex: 0 }}
       />
 
       {/* Content stack */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "2rem",
-        }}
-      >
+      <div className="relative z-10 text-center flex flex-col items-center px-11 py-11">
         {/* Wordmark */}
-        <p
-          style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "12px",
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: "#7a7570",
-            marginBottom: "2rem",
-            margin: "0 0 2rem 0",
-          }}
-        >
+        <p className="hero-wordmark font-serif text-[12px] tracking-[0.3em] uppercase text-[#7a7570] mb-8">
           HOLLOW OPTICAL
         </p>
 
         {/* Headline */}
         <h1
-          style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "clamp(32px, 5vw, 44px)",
-            textTransform: "uppercase",
-            color: "#e8e4de",
-            lineHeight: "1.2",
-            letterSpacing: "0.02em",
-            animation: "heroFadeUp 600ms ease 300ms both",
-            maxWidth: "680px",
-            margin: "0 0 1.5rem 0",
-            fontWeight: 500,
-          }}
+          className="font-serif uppercase text-[#e8e4de] leading-[1.2] tracking-[0.02em] max-w-[680px] mb-6 font-medium hero-headline"
+          style={{ fontSize: "clamp(32px, 5vw, 44px)" }}
         >
           MADE FOR THE LIGHT YOU CANNOT CHANGE.
         </h1>
 
         {/* Supporting text */}
-        <p
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: "16px",
-            color: "#7a7570",
-            maxWidth: "480px",
-            margin: "0 auto 2.5rem auto",
-            lineHeight: "1.7",
-          }}
-        >
+        <p className="font-sans text-[14px] text-[#7a7570] max-w-[480px] mb-10 leading-[1.7] text-left">
           Grade-5 titanium frames with FL-41 deep-red lenses, built for people
           who spend their days under hostile artificial light.
         </p>
 
         {/* Buttons */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "1.25rem",
-          }}
-        >
+        <div className="flex flex-col items-center gap-5">
           <button
             type="button"
             data-ocid="hero.primary_button"
             onClick={() => smoothScrollTo("products")}
-            style={{
-              border: "1px solid #9e1a1a",
-              color: "#9e1a1a",
-              background: "transparent",
-              padding: "12px 32px",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "14px",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              transition: "background 200ms ease, color 200ms ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#9e1a1a";
-              e.currentTarget.style.color = "#e8e4de";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#9e1a1a";
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.outline = "2px solid #9e1a1a";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.outline = "none";
-            }}
+            className="hero-cta-primary cta-snap border border-[#9e1a1a] text-[#9e1a1a] bg-transparent py-3 px-8 font-sans text-[14px] tracking-[0.1em] uppercase cursor-pointer"
           >
             View frames
           </button>
@@ -148,37 +58,13 @@ export default function Hero() {
             type="button"
             data-ocid="hero.secondary_button"
             onClick={() => smoothScrollTo("technology")}
-            style={{
-              background: "none",
-              border: "none",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "13px",
-              color: "#7a7570",
-              textDecoration: "underline",
-              cursor: "pointer",
-              transition: "color 200ms ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#e8e4de";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#7a7570";
-            }}
+            className="hero-cta-secondary bg-transparent border-none font-sans text-[13px] text-[#7a7570] underline cursor-pointer hover:text-[#e8e4de] focus-visible:outline-none focus-visible:text-[#e8e4de] py-3"
+            style={{ transition: "none" }}
           >
             Read the technology
           </button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-heading { animation: none !important; }
-        }
-      `}</style>
     </section>
   );
 }

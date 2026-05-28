@@ -18408,22 +18408,44 @@ const smoothScrollTo$2 = (id) => {
   if (el) el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" });
 };
 function CTASection() {
+  const sectionRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "section",
     {
       id: "cta",
+      ref: sectionRef,
       "data-ocid": "cta.section",
-      style: { padding: "8rem 2rem", textAlign: "center" },
+      className: "py-32 px-8 text-center",
+      style: {
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity"
+      },
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "p",
           {
+            className: "font-serif text-[#e8e4de] mx-auto mb-10 text-left",
             style: {
-              fontFamily: "'Cormorant Garamond', serif",
               fontSize: "clamp(22px, 3vw, 28px)",
-              color: "#e8e4de",
               maxWidth: "600px",
-              margin: "0 auto 2.5rem auto",
               lineHeight: "1.4",
               fontStyle: "italic",
               letterSpacing: "0.02em"
@@ -18437,15 +18459,16 @@ function CTASection() {
             type: "button",
             "data-ocid": "cta.primary_button",
             onClick: () => smoothScrollTo$2("products"),
+            className: "uppercase",
             style: {
               border: "1px solid #9e1a1a",
               color: "#9e1a1a",
               background: "transparent",
               padding: "14px 40px",
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "14px",
+              minHeight: "44px",
+              fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+              fontSize: "12px",
               letterSpacing: "0.1em",
-              textTransform: "uppercase",
               cursor: "pointer",
               transition: "background 200ms ease, color 200ms ease"
             },
@@ -18472,74 +18495,11 @@ function CTASection() {
     }
   );
 }
-function CursorRadar() {
-  const [position, setPosition] = reactExports.useState({ x: 0, y: 0 });
-  const [pulses, setPulses] = reactExports.useState([]);
-  reactExports.useEffect(() => {
-    const handleMouseMove = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    const pulseInterval = setInterval(() => {
-      const newPulse = { id: Date.now(), timestamp: Date.now() };
-      setPulses((prev) => [...prev, newPulse]);
-      setTimeout(() => {
-        setPulses((prev) => prev.filter((p) => p.id !== newPulse.id));
-      }, 2e3);
-    }, 4e3);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      clearInterval(pulseInterval);
-    };
-  }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "fixed inset-0 pointer-events-none z-[9999]", children: [
-    pulses.map((pulse) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "div",
-        {
-          className: "absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2",
-          style: {
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            animation: "pulse-ring 2s cubic-bezier(0.4, 0, 0.2, 1) forwards"
-          },
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full rounded-full border rounded-full" })
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "div",
-        {
-          className: "absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2",
-          style: {
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            animation: "pulse-ring 2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards"
-          },
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full h-full rounded-full border rounded-full" })
-        }
-      )
-    ] }, pulse.id)),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
-        @keyframes pulse-ring {
-          0% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            border-color: #9e1a1a;
-          }
-          100% {
-            transform: translate(-50%, -50%) scale(10);
-            opacity: 0;
-            border-color: #9e1a1a;
-          }
-        }
-      ` })
-  ] });
-}
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#@$%&";
 function GlitchText({
   text,
   className = "",
-  durationMs = 180
+  durationMs = 200
 }) {
   const spanRef = reactExports.useRef(null);
   const hasRunRef = reactExports.useRef(false);
@@ -18581,7 +18541,9 @@ function GlitchText({
       { threshold: 0.1 }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [text, durationMs]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { ref: spanRef, className, children: text });
 }
@@ -18591,71 +18553,55 @@ const paragraphs$1 = [
   "Existing options fail on both sides. Cheap blue-light glasses lack spectral precision and design conviction. Clinical FL-41 eyewear — originally developed for photosensitivity management — works, but looks medical. Most people who would benefit from it will not wear it. Nothing sits in between."
 ];
 function EnvironmentSection() {
+  const sectionRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "section",
     {
       id: "environment",
+      ref: sectionRef,
       "data-ocid": "environment.section",
-      style: { padding: "6rem 0", borderTop: "1px solid #9e1a1a" },
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          style: {
-            maxWidth: "1100px",
-            margin: "0 auto",
-            padding: "0 2rem"
+      className: "py-20",
+      style: {
+        borderTop: "1px solid #9e1a1a",
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity"
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-12 gap-y-8 md:gap-x-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "h2",
+          {
+            className: "font-serif uppercase text-[#e8e4de] text-left tracking-[0.1em] font-medium",
+            style: { fontSize: "clamp(24px, 3vw, 32px)" },
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "THE LIGHT IS THE PROBLEM", durationMs: 180 })
+          }
+        ) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-start-5 md:col-span-8 flex flex-col gap-6", children: paragraphs$1.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: "font-sans text-[16px] leading-[1.6] text-[#e8e4de] text-left m-0",
+            children: p
           },
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "h2",
-              {
-                style: {
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "clamp(24px, 3vw, 32px)",
-                  textTransform: "uppercase",
-                  color: "#e8e4de",
-                  textAlign: "center",
-                  marginBottom: "3rem",
-                  letterSpacing: "0.1em",
-                  fontWeight: 500
-                },
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "THE LIGHT IS THE PROBLEM", durationMs: 180 })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
-                  gap: "2.5rem"
-                },
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "div",
-                  {
-                    style: { display: "flex", flexDirection: "column", gap: "1.5rem" },
-                    children: paragraphs$1.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "p",
-                      {
-                        style: {
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: "16px",
-                          lineHeight: "1.7",
-                          color: "#e8e4de",
-                          textAlign: "left",
-                          margin: 0
-                        },
-                        children: p
-                      },
-                      p.slice(0, 20)
-                    ))
-                  }
-                )
-              }
-            )
-          ]
-        }
-      )
+          p.slice(0, 20)
+        )) })
+      ] }) })
     }
   );
 }
@@ -18678,75 +18624,63 @@ const faqs = [
   }
 ];
 function FAQSection() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("section", { id: "faq", "data-ocid": "faq.section", style: { padding: "6rem 0" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      style: {
-        maxWidth: "700px",
-        margin: "0 auto",
-        padding: "0 2rem"
+  const sectionRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
       },
-      children: [
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "section",
+    {
+      id: "faq",
+      ref: sectionRef,
+      "data-ocid": "faq.section",
+      className: "py-20",
+      style: {
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity"
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-[700px]", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "h2",
           {
-            style: {
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(24px, 3vw, 32px)",
-              textTransform: "uppercase",
-              color: "#e8e4de",
-              textAlign: "center",
-              marginBottom: "3rem",
-              letterSpacing: "0.1em",
-              fontWeight: 500
-            },
+            className: "font-serif uppercase text-[#e8e4de] text-left mb-10 tracking-[0.1em] font-medium",
+            style: { fontSize: "clamp(24px, 3vw, 32px)" },
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "FAQ", durationMs: 120 })
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("dl", { style: { margin: 0, padding: 0 }, children: faqs.map((item, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { "data-ocid": `faq.item.${i + 1}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("dl", { className: "m-0 p-0", children: faqs.map((item, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { "data-ocid": `faq.item.${i + 1}`, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "dt",
             {
+              className: "font-sans text-[16px] text-[#e8e4de] font-medium mb-2",
               style: {
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "14px",
                 fontVariant: "small-caps",
-                color: "#e8e4de",
-                fontWeight: 500,
-                marginBottom: "0.5rem",
                 marginTop: i === 0 ? 0 : "1.5rem"
               },
               children: item.q
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "dd",
-            {
-              style: {
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "16px",
-                color: "#7a7570",
-                lineHeight: "1.7",
-                marginBottom: "1.5rem",
-                marginLeft: 0
-              },
-              children: item.a
-            }
-          ),
-          i < faqs.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "hr",
-            {
-              style: {
-                border: "none",
-                borderTop: "1px solid #9e1a1a",
-                margin: 0
-              }
-            }
-          )
+          /* @__PURE__ */ jsxRuntimeExports.jsx("dd", { className: "font-sans text-[16px] text-[#7a7570] leading-[1.6] mb-4 ml-0", children: item.a }),
+          i < faqs.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-[#9e1a1a] w-full" })
         ] }, item.q)) })
-      ]
+      ] }) })
     }
-  ) });
+  );
 }
 function FilmGrain() {
   const canvasRef = reactExports.useRef(null);
@@ -18810,114 +18744,23 @@ function FooterSection() {
     "footer",
     {
       "data-ocid": "footer.section",
+      className: "text-center py-8 px-8",
       style: {
-        textAlign: "center",
-        padding: "2rem",
         borderTop: "1px solid rgba(255,255,255,0.06)"
       },
       children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         "span",
         {
           style: {
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
             fontSize: "11px",
-            color: "rgba(232,228,222,0.4)",
-            letterSpacing: "0.05em"
+            color: "#7a7570",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase"
           },
           children: "SYS.VER 4.0  //  LAT: 51.507°  //  STATUS: SECURE."
         }
       )
-    }
-  );
-}
-const GLITCH_TEXTS = ["[ NULL ]", "[ 0xFF ]", "[ //// ]", "[ ER:40 ]"];
-const NORMAL_TEXT = "[ MENU ]";
-const BREACH_TEXTS = ["⚠ SIGNAL LOST", "⚠ BREACH DETECTED"];
-function HUDFrame({ isMenuOpen, setIsMenuOpen }) {
-  const [buttonText, setButtonText] = reactExports.useState(NORMAL_TEXT);
-  const [isGlitching, setIsGlitching] = reactExports.useState(false);
-  const [isExited, setIsExited] = reactExports.useState(false);
-  const [statusText, setStatusText] = reactExports.useState("STATUS: SECURE.");
-  reactExports.useEffect(() => {
-    const scheduleNextGlitch = () => {
-      const nextGlitchDelay = 3e3 + Math.random() * 5e3;
-      return setTimeout(() => {
-        setIsGlitching(true);
-        const randomGlitchText = GLITCH_TEXTS[Math.floor(Math.random() * GLITCH_TEXTS.length)];
-        setButtonText(randomGlitchText);
-        const glitchDuration = 100 + Math.random() * 100;
-        setTimeout(() => {
-          setIsGlitching(false);
-          setButtonText(NORMAL_TEXT);
-          scheduleNextGlitch();
-        }, glitchDuration);
-      }, nextGlitchDelay);
-    };
-    const timeoutId = scheduleNextGlitch();
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
-  reactExports.useEffect(() => {
-    const handleMouseLeave = () => {
-      setIsExited(true);
-      const randomBreachText = BREACH_TEXTS[Math.floor(Math.random() * BREACH_TEXTS.length)];
-      setStatusText(randomBreachText);
-    };
-    const handleMouseEnter = () => {
-      setIsExited(false);
-      setStatusText("STATUS: SECURE.");
-    };
-    document.addEventListener("mouseleave", handleMouseLeave);
-    document.addEventListener("mouseenter", handleMouseEnter);
-    return () => {
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      document.removeEventListener("mouseenter", handleMouseEnter);
-    };
-  }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      className: "fixed inset-0 pointer-events-none z-[900]",
-      style: { fontFamily: 'Orbitron, "Roboto Mono", monospace' },
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-5 left-5 text-white text-[10px] tracking-[2px] uppercase pointer-events-none", children: "HOLLOW OPTICAL." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => setIsMenuOpen(!isMenuOpen),
-            className: "hud-menu-button absolute top-5 text-white text-[10px] tracking-[2px] uppercase pointer-events-auto hover:text-blood-red transition-all duration-600 hover:glow-red-text",
-            style: {
-              right: "calc(1.25rem + var(--scrollbar-width, 0px))",
-              transitionTimingFunction: "cubic-bezier(0.4, 0.0, 0.2, 1)"
-            },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "span",
-              {
-                className: "hud-menu-text",
-                style: {
-                  transform: isGlitching ? `translateX(${Math.random() > 0.5 ? 2 : -2}px)` : "translateX(0)",
-                  transition: isGlitching ? "transform 0ms linear" : "transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1)"
-                },
-                children: buttonText
-              }
-            )
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-5 left-5 text-white text-[10px] tracking-[2px] uppercase pointer-events-none", children: "SYS.VER.4.0 // LAT: 51.507." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            className: "absolute bottom-5 right-5 text-[10px] tracking-[2px] uppercase pointer-events-none",
-            style: {
-              color: isExited ? "#9e1a1a" : "#FFFFFF",
-              animation: isExited ? "signal-fail 0.2s infinite" : "none"
-            },
-            children: statusText
-          }
-        )
-      ]
     }
   );
 }
@@ -18934,180 +18777,53 @@ function Hero() {
     {
       id: "hero",
       "data-ocid": "hero.section",
-      style: {
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden"
-      },
+      className: "relative min-h-screen flex items-center justify-center overflow-hidden",
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "img",
           {
-            className: "hero-sigil",
+            className: "hero-sigil absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-auto pointer-events-none",
             src: "/assets/eye-star.png",
             alt: "",
             "aria-hidden": "true",
-            style: {
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "clamp(300px, 40vw, 500px)",
-              height: "auto",
-              opacity: 0.06,
-              pointerEvents: "none",
-              zIndex: 0
+            style: { width: "clamp(300px, 40vw, 500px)", opacity: 0.06, zIndex: 0 }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 text-center flex flex-col items-center px-11 py-11", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "hero-wordmark font-serif text-[12px] tracking-[0.3em] uppercase text-[#7a7570] mb-8", children: "HOLLOW OPTICAL" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "h1",
+            {
+              className: "font-serif uppercase text-[#e8e4de] leading-[1.2] tracking-[0.02em] max-w-[680px] mb-6 font-medium hero-headline",
+              style: { fontSize: "clamp(32px, 5vw, 44px)" },
+              children: "MADE FOR THE LIGHT YOU CANNOT CHANGE."
             }
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "div",
-          {
-            style: {
-              position: "relative",
-              zIndex: 1,
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "2rem"
-            },
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "p",
-                {
-                  style: {
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: "12px",
-                    letterSpacing: "0.3em",
-                    textTransform: "uppercase",
-                    color: "#7a7570",
-                    marginBottom: "2rem",
-                    margin: "0 0 2rem 0"
-                  },
-                  children: "HOLLOW OPTICAL"
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "h1",
-                {
-                  style: {
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: "clamp(32px, 5vw, 44px)",
-                    textTransform: "uppercase",
-                    color: "#e8e4de",
-                    lineHeight: "1.2",
-                    letterSpacing: "0.02em",
-                    animation: "heroFadeUp 600ms ease 300ms both",
-                    maxWidth: "680px",
-                    margin: "0 0 1.5rem 0",
-                    fontWeight: 500
-                  },
-                  children: "MADE FOR THE LIGHT YOU CANNOT CHANGE."
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "p",
-                {
-                  style: {
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "16px",
-                    color: "#7a7570",
-                    maxWidth: "480px",
-                    margin: "0 auto 2.5rem auto",
-                    lineHeight: "1.7"
-                  },
-                  children: "Grade-5 titanium frames with FL-41 deep-red lenses, built for people who spend their days under hostile artificial light."
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "1.25rem"
-                  },
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "button",
-                      {
-                        type: "button",
-                        "data-ocid": "hero.primary_button",
-                        onClick: () => smoothScrollTo$1("products"),
-                        style: {
-                          border: "1px solid #9e1a1a",
-                          color: "#9e1a1a",
-                          background: "transparent",
-                          padding: "12px 32px",
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: "14px",
-                          letterSpacing: "0.1em",
-                          textTransform: "uppercase",
-                          cursor: "pointer",
-                          transition: "background 200ms ease, color 200ms ease"
-                        },
-                        onMouseEnter: (e) => {
-                          e.currentTarget.style.background = "#9e1a1a";
-                          e.currentTarget.style.color = "#e8e4de";
-                        },
-                        onMouseLeave: (e) => {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#9e1a1a";
-                        },
-                        onFocus: (e) => {
-                          e.currentTarget.style.outline = "2px solid #9e1a1a";
-                        },
-                        onBlur: (e) => {
-                          e.currentTarget.style.outline = "none";
-                        },
-                        children: "View frames"
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "button",
-                      {
-                        type: "button",
-                        "data-ocid": "hero.secondary_button",
-                        onClick: () => smoothScrollTo$1("technology"),
-                        style: {
-                          background: "none",
-                          border: "none",
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: "13px",
-                          color: "#7a7570",
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          transition: "color 200ms ease"
-                        },
-                        onMouseEnter: (e) => {
-                          e.currentTarget.style.color = "#e8e4de";
-                        },
-                        onMouseLeave: (e) => {
-                          e.currentTarget.style.color = "#7a7570";
-                        },
-                        children: "Read the technology"
-                      }
-                    )
-                  ]
-                }
-              )
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
-        @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-heading { animation: none !important; }
-        }
-      ` })
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-sans text-[14px] text-[#7a7570] max-w-[480px] mb-10 leading-[1.7] text-left", children: "Grade-5 titanium frames with FL-41 deep-red lenses, built for people who spend their days under hostile artificial light." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-5", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                "data-ocid": "hero.primary_button",
+                onClick: () => smoothScrollTo$1("products"),
+                className: "hero-cta-primary cta-snap border border-[#9e1a1a] text-[#9e1a1a] bg-transparent py-3 px-8 font-sans text-[14px] tracking-[0.1em] uppercase cursor-pointer",
+                children: "View frames"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                "data-ocid": "hero.secondary_button",
+                onClick: () => smoothScrollTo$1("technology"),
+                className: "hero-cta-secondary bg-transparent border-none font-sans text-[13px] text-[#7a7570] underline cursor-pointer hover:text-[#e8e4de] focus-visible:outline-none focus-visible:text-[#e8e4de] py-3",
+                style: { transition: "none" },
+                children: "Read the technology"
+              }
+            )
+          ] })
+        ] })
       ]
     }
   );
@@ -19143,86 +18859,6 @@ function LoadingScreen() {
     }
   );
 }
-const navLinks$1 = [
-  { label: "HOME", sectionId: "hero" },
-  { label: "PRODUCTS", sectionId: "products" },
-  { label: "TECHNOLOGY", sectionId: "technology" },
-  { label: "VISION", sectionId: "vision" }
-];
-function MenuOverlay({
-  isOpen,
-  setIsMenuOpen
-}) {
-  const [isVisible, setIsVisible] = reactExports.useState(false);
-  reactExports.useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => setIsVisible(true), 50);
-      return () => clearTimeout(timer);
-    }
-    setIsVisible(false);
-  }, [isOpen]);
-  const handleLinkClick = (sectionId) => {
-    setIsMenuOpen(false);
-    setTimeout(() => {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 300);
-  };
-  if (!isOpen) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      className: "fixed inset-0 z-[999] flex items-center justify-center",
-      style: {
-        background: "rgba(0, 0, 0, 0.92)",
-        backdropFilter: "blur(12px)",
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)",
-        pointerEvents: isOpen ? "auto" : "none"
-      },
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => setIsMenuOpen(false),
-            className: "hud-menu-button absolute top-5 text-white text-[10px] tracking-[2px] uppercase pointer-events-auto",
-            style: {
-              right: "calc(1.25rem + var(--scrollbar-width, 0px))",
-              fontFamily: 'Orbitron, "Roboto Mono", monospace'
-            },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "hud-menu-text", children: "[ CLOSE ]" })
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { "aria-label": "Site navigation", children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "flex flex-col items-center justify-center gap-8 list-none m-0 p-0", children: navLinks$1.map((link, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            onClick: () => handleLinkClick(link.sectionId),
-            className: "menu-link text-white font-bold uppercase tracking-wider",
-            style: {
-              fontSize: "clamp(2.5rem, 5vw, 4rem)",
-              fontFamily: "'Cormorant Garamond', serif",
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible ? "translateY(0)" : "translateY(40px)",
-              transition: `opacity 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) ${index2 * 0.1 + 0.2}s, transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) ${index2 * 0.1 + 0.2}s`
-            },
-            children: link.label
-          }
-        ) }, link.label)) }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
-        .menu-link:hover {
-          color: #9e1a1a;
-          text-shadow: 0 0 20px rgba(158, 26, 26, 0.5);
-          transition: color 0ms, text-shadow 0ms;
-        }
-      ` })
-      ]
-    }
-  );
-}
 const smoothScrollTo = (id) => {
   const prefersReduced = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
@@ -19241,12 +18877,10 @@ function NavBar({ scrolled }) {
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "nav",
       {
-        className: "fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-14",
+        className: `fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-14${scrolled ? " nav-scrolled" : ""}`,
         style: {
-          background: scrolled ? "rgba(10,10,10,0.92)" : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          transition: "background 300ms ease, backdrop-filter 300ms ease",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none"
+          background: scrolled ? void 0 : "transparent",
+          transition: "none"
         },
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -19254,13 +18888,7 @@ function NavBar({ scrolled }) {
             {
               type: "button",
               onClick: () => smoothScrollTo("hero"),
-              className: "flex items-center gap-3 focus-visible:outline-[2px] focus-visible:outline-solid focus-visible:outline-[#9e1a1a]",
-              style: {
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer"
-              },
+              className: "flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-[#9e1a1a] bg-transparent border-none p-0 cursor-pointer",
               children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "img",
@@ -19274,11 +18902,11 @@ function NavBar({ scrolled }) {
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "span",
                   {
+                    className: "uppercase",
                     style: {
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: "12px",
                       letterSpacing: "0.3em",
-                      textTransform: "uppercase",
                       color: "#e8e4de"
                     },
                     children: "HOLLOW OPTICAL"
@@ -19287,38 +18915,22 @@ function NavBar({ scrolled }) {
               ]
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "ul",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "flex items-center gap-8 list-none m-0 p-0", children: navLinks.map((link) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "hidden sm:block", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
             {
-              className: "flex items-center gap-8 list-none m-0 p-0",
-              style: { fontFamily: "'DM Sans', sans-serif" },
-              children: navLinks.map((link) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "hidden sm:block", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "button",
-                {
-                  type: "button",
-                  onClick: () => smoothScrollTo(link.id),
-                  className: "nav-link-btn",
-                  style: {
-                    background: "none",
-                    border: "none",
-                    padding: "4px 0",
-                    fontSize: "13px",
-                    letterSpacing: "0.05em",
-                    color: "#e8e4de",
-                    cursor: "pointer",
-                    transition: "color 200ms ease"
-                  },
-                  onMouseEnter: (e) => {
-                    e.currentTarget.style.color = "#9e1a1a";
-                  },
-                  onMouseLeave: (e) => {
-                    e.currentTarget.style.color = "#e8e4de";
-                  },
-                  children: link.label
-                }
-              ) }, link.id))
+              type: "button",
+              onClick: () => smoothScrollTo(link.id),
+              className: "nav-link-btn menu-link bg-transparent border-none p-1 cursor-pointer text-[#e8e4de]",
+              style: {
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "13px",
+                letterSpacing: "0.05em",
+                transition: "none",
+                minHeight: "44px"
+              },
+              children: link.label
             }
-          )
+          ) }, link.id)) })
         ]
       }
     ),
@@ -19360,46 +18972,24 @@ const SPECS = [
   { label: "Weight", value: "~18g" }
 ];
 function ProductSection() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "section",
-    {
-      id: "products",
-      "data-ocid": "products.section",
-      style: { padding: "6rem 0" },
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { maxWidth: "1100px", margin: "0 auto", padding: "0 2rem" }, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "h2",
-          {
-            style: {
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(24px, 3vw, 32px)",
-              textTransform: "uppercase",
-              color: "#e8e4de",
-              textAlign: "center",
-              marginBottom: "4rem",
-              letterSpacing: "0.1em",
-              fontWeight: 500
-            },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "PRODUCTS", durationMs: 180 })
-          }
-        ),
-        PRODUCTS.map((product, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(ProductCard, { product, index: index2 }),
-          index2 < PRODUCTS.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "hr",
-            {
-              style: {
-                border: "none",
-                borderTop: "1px solid #9e1a1a",
-                margin: "3rem 0",
-                width: "100%"
-              }
-            }
-          )
-        ] }, product.id))
-      ] })
-    }
-  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("section", { id: "products", "data-ocid": "products.section", className: "py-20", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto px-8", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "h2",
+      {
+        className: "font-serif uppercase text-[#e8e4de] text-left mb-12 tracking-[0.1em] font-medium",
+        style: { fontSize: "clamp(24px, 3vw, 32px)" },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "PRODUCTS", durationMs: 180 })
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "grid grid-cols-1",
+        style: { border: "1px solid #111111" },
+        children: PRODUCTS.map((product, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(ProductCard, { product, index: index2 }, product.id))
+      }
+    )
+  ] }) });
 }
 function ProductCard({ product, index: index2 }) {
   const cardRef = reactExports.useRef(null);
@@ -19411,7 +19001,6 @@ function ProductCard({ product, index: index2 }) {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
             observer.disconnect();
           }
         }
@@ -19421,153 +19010,65 @@ function ProductCard({ product, index: index2 }) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const isEven = index2 % 2 === 0;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
       ref: cardRef,
       "data-ocid": `products.item.${index2 + 1}`,
+      className: "grid grid-cols-1 md:grid-cols-2",
       style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "2rem",
         opacity: 0,
-        transform: "translateY(16px)",
-        transition: "opacity 500ms ease, transform 500ms ease"
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity",
+        borderTop: index2 > 0 ? "1px solid #111111" : void 0
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.borderColor = "#9e1a1a";
+        e.currentTarget.style.borderTopColor = "#9e1a1a";
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.borderColor = "";
+        e.currentTarget.style.borderTopColor = index2 > 0 ? "#111111" : "";
       },
       children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
-        @media (min-width: 768px) {
-          .product-row-${index2} {
-            flex-direction: ${isEven ? "row" : "row-reverse"} !important;
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative aspect-[4/3] overflow-hidden bg-[#111111]", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "img",
+          {
+            src: product.image,
+            alt: product.alt,
+            className: "absolute inset-0 w-full h-full object-cover block",
+            onError: (e) => {
+              const img = e.currentTarget;
+              img.style.display = "none";
+            }
           }
-        }
-      ` }),
+        ) }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "div",
           {
-            className: `product-row-${index2}`,
-            style: { display: "flex", flexDirection: "column", gap: "2rem" },
+            className: "flex flex-col justify-center p-8",
+            style: { borderLeft: "1px solid #111111" },
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { flex: "0 0 55%", minWidth: 0 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "img",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-serif text-[22px] uppercase tracking-[0.1em] text-[#e8e4de] mb-2 font-medium text-left", children: product.name }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-sans text-[16px] leading-[1.6] text-[#7a7570] mb-4 text-left", children: product.description }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "p",
                 {
-                  className: "product-img",
-                  src: product.image,
-                  alt: product.alt,
+                  className: "mb-6 text-left",
                   style: {
-                    width: "100%",
-                    aspectRatio: "4/3",
-                    objectFit: "cover",
-                    display: "block"
+                    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+                    fontSize: "11px",
+                    letterSpacing: "0.2em",
+                    color: "#9e1a1a",
+                    textTransform: "uppercase"
                   },
-                  onError: (e) => {
-                    e.currentTarget.src = "/assets/placeholder.svg";
-                  }
+                  children: "£159.00"
                 }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "div",
-                {
-                  style: {
-                    flex: "0 0 45%",
-                    minWidth: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center"
-                  },
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "h3",
-                      {
-                        style: {
-                          fontFamily: "'Cormorant Garamond', serif",
-                          fontSize: "22px",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.1em",
-                          color: "#e8e4de",
-                          marginBottom: "0.5rem",
-                          fontWeight: 500
-                        },
-                        children: product.name
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "p",
-                      {
-                        style: {
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: "14px",
-                          color: "#7a7570",
-                          marginBottom: "1rem"
-                        },
-                        children: product.description
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "p",
-                      {
-                        style: {
-                          fontFamily: "'Cormorant Garamond', serif",
-                          fontSize: "20px",
-                          color: "#9e1a1a",
-                          marginBottom: "1.5rem",
-                          letterSpacing: "0.05em"
-                        },
-                        children: "£159.00"
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        style: {
-                          borderTop: "1px solid #9e1a1a",
-                          paddingTop: "1rem",
-                          width: "100%"
-                        },
-                        children: SPECS.map((spec) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                          "div",
-                          {
-                            style: {
-                              display: "flex",
-                              justifyContent: "space-between",
-                              padding: "6px 0",
-                              borderBottom: "1px solid rgba(255,255,255,0.06)"
-                            },
-                            children: [
-                              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                                "span",
-                                {
-                                  style: {
-                                    fontFamily: "'JetBrains Mono', monospace",
-                                    fontSize: "11px",
-                                    color: "#7a7570",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.05em"
-                                  },
-                                  children: spec.label
-                                }
-                              ),
-                              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                                "span",
-                                {
-                                  style: {
-                                    fontFamily: "'DM Sans', sans-serif",
-                                    fontSize: "13px",
-                                    color: "#e8e4de"
-                                  },
-                                  children: spec.value
-                                }
-                              )
-                            ]
-                          },
-                          spec.label
-                        ))
-                      }
-                    )
-                  ]
-                }
-              )
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full", style: { borderTop: "1px solid #9e1a1a" }, children: SPECS.map((spec) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "spec-row", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "spec-label", children: spec.label }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "spec-value", children: spec.value })
+              ] }, spec.label)) })
             ]
           }
         )
@@ -19642,6 +19143,24 @@ const ITEMS = [
 ];
 function TechnologySection() {
   const [openSection, setOpenSection] = reactExports.useState(ITEMS[0].title);
+  const sectionRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const toggleSection = (title) => {
     setOpenSection((current) => current === title ? null : title);
   };
@@ -19649,53 +19168,60 @@ function TechnologySection() {
     "section",
     {
       id: "technology",
+      ref: sectionRef,
       "data-ocid": "technology.section",
-      style: { padding: "6rem 0" },
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { maxWidth: "800px", margin: "0 auto", padding: "0 2rem" }, children: [
+      className: "pt-10 pb-24",
+      style: {
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity"
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto px-8", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "h2",
           {
-            style: {
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(24px, 3vw, 32px)",
-              textTransform: "uppercase",
-              color: "#e8e4de",
-              textAlign: "center",
-              marginBottom: "3rem",
-              letterSpacing: "0.1em",
-              fontWeight: 500
-            },
+            className: "font-serif uppercase text-[#e8e4de] text-left mb-8 tracking-[0.1em] font-medium",
+            style: { fontSize: "clamp(24px, 3vw, 32px)" },
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "TECHNOLOGY", durationMs: 180 })
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: "8px" }, children: ITEMS.map((item, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-          TechItem,
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
           {
-            item,
-            isOpen: openSection === item.title,
-            onToggle: () => toggleSection(item.title),
-            index: index2
-          },
-          item.title
-        )) })
+            className: "border border-[#111111]",
+            style: { outline: "1px solid #111111" },
+            children: ITEMS.map((item, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              TechItem,
+              {
+                item,
+                isOpen: openSection === item.title,
+                onToggle: () => toggleSection(item.title),
+                isLast: index2 === ITEMS.length - 1
+              },
+              item.title
+            ))
+          }
+        )
       ] })
     }
   );
 }
-function TechItem({ item, isOpen, onToggle }) {
-  const contentRef = reactExports.useRef(null);
-  const [contentHeight, setContentHeight] = reactExports.useState(0);
-  reactExports.useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight);
-    }
-  }, []);
+function TechItem({ item, isOpen, onToggle, isLast }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
+      className: "bg-[#0a0a0a] p-6",
       style: {
-        borderBottom: "1px solid rgba(255,255,255,0.1)"
+        borderBottom: isLast ? "none" : "1px solid #111111",
+        transition: "none"
       },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.borderColor = "#9e1a1a";
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.borderColor = "#111111";
+      },
+      "data-ocid": `technology.item.${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
@@ -19704,41 +19230,29 @@ function TechItem({ item, isOpen, onToggle }) {
             "aria-expanded": isOpen,
             "aria-controls": `tech-panel-${item.title}`,
             onClick: onToggle,
-            "data-ocid": `technology.item.${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
-            style: {
-              display: "flex",
-              width: "100%",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "1.25rem 0",
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "16px",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: "#e8e4de",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left"
-            },
-            onFocus: (e) => {
-              e.currentTarget.style.outline = "2px solid #9e1a1a";
-            },
-            onBlur: (e) => {
-              e.currentTarget.style.outline = "none";
-            },
+            className: "flex w-full justify-between items-start gap-4 font-serif text-[14px] uppercase tracking-[0.08em] text-[#e8e4de] bg-transparent border-none cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9e1a1a] mb-0",
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: item.title }),
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "span",
                 {
+                  className: "text-left",
+                  style: {
+                    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+                    fontSize: "12px",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "#e8e4de"
+                  },
+                  children: item.title
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  className: "text-[#9e1a1a] shrink-0 leading-none",
                   style: {
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "18px",
-                    color: "#9e1a1a",
-                    flexShrink: 0,
-                    marginLeft: "1rem",
-                    lineHeight: 1
+                    fontSize: "14px"
                   },
                   children: isOpen ? "−" : "+"
                 }
@@ -19751,25 +19265,8 @@ function TechItem({ item, isOpen, onToggle }) {
           {
             id: `tech-panel-${item.title}`,
             "aria-label": item.title,
-            style: {
-              overflow: "hidden",
-              maxHeight: isOpen ? `${contentHeight}px` : "0px",
-              opacity: isOpen ? 1 : 0,
-              transition: "max-height 300ms ease, opacity 250ms ease"
-            },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: contentRef, style: { paddingBottom: "1.25rem" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "p",
-              {
-                style: {
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "15px",
-                  lineHeight: "1.7",
-                  color: "#7a7570",
-                  margin: 0
-                },
-                children: item.content
-              }
-            ) })
+            className: isOpen ? "tech-content-open overflow-hidden" : "tech-content-closed overflow-hidden",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pt-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-sans text-[14px] leading-[1.6] text-[#7a7570] m-0 text-left", children: item.content }) })
           }
         )
       ]
@@ -19783,71 +19280,59 @@ const paragraphs = [
   "One tint. Three frames. No unnecessary variation, no product sprawl. The constraints are intentional."
 ];
 function VisionSection() {
+  const sectionRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "section",
     {
       id: "vision",
+      ref: sectionRef,
       "data-ocid": "vision.section",
-      style: { padding: "6rem 0" },
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          style: {
-            maxWidth: "700px",
-            margin: "0 auto",
-            padding: "0 2rem"
+      className: "py-20",
+      style: {
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity"
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-[700px]", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "h2",
+          {
+            className: "font-serif uppercase text-[#e8e4de] text-left mb-10 tracking-[0.1em] font-medium",
+            style: { fontSize: "clamp(24px, 3vw, 32px)" },
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "VISION", durationMs: 180 })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col", children: paragraphs.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: "font-sans text-[16px] leading-[1.6] text-[#e8e4de] text-left mb-6 m-0 last:mb-0",
+            children: p
           },
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "h2",
-              {
-                style: {
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "clamp(24px, 3vw, 32px)",
-                  textTransform: "uppercase",
-                  color: "#e8e4de",
-                  textAlign: "center",
-                  marginBottom: "3rem",
-                  letterSpacing: "0.1em",
-                  fontWeight: 500
-                },
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(GlitchText, { text: "VISION", durationMs: 180 })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 0 }, children: paragraphs.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "p",
-              {
-                style: {
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "16px",
-                  lineHeight: "1.7",
-                  color: "#e8e4de",
-                  textAlign: "left",
-                  marginBottom: "1.5rem"
-                },
-                children: p
-              },
-              p.slice(0, 20)
-            )) })
-          ]
-        }
-      )
+          p.slice(0, 20)
+        )) })
+      ] }) })
     }
   );
 }
-const queryClient$1 = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1e3
-      // 5 minutes
-    }
-  }
-});
 function App() {
   const [isLoading, setIsLoading] = reactExports.useState(true);
-  const [isMenuOpen, setIsMenuOpen] = reactExports.useState(false);
   const [scrolled, setScrolled] = reactExports.useState(false);
   reactExports.useEffect(() => {
     let cancelled = false;
@@ -19869,46 +19354,34 @@ function App() {
     };
   }, []);
   reactExports.useEffect(() => {
-    if (isMenuOpen) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-        document.documentElement.style.setProperty(
-          "--scrollbar-width",
-          `${scrollbarWidth}px`
-        );
-      }
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-      document.documentElement.style.setProperty("--scrollbar-width", "0px");
+    const hero = document.getElementById("hero");
+    if (!hero) {
+      const handleScroll = () => setScrolled(window.scrollY > 60);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
     }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-      document.documentElement.style.setProperty("--scrollbar-width", "0px");
-    };
-  }, [isMenuOpen]);
-  reactExports.useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          setScrolled(!entry.isIntersecting);
+        }
+      },
+      { threshold: 0, rootMargin: "-56px 0px 0px 0px" }
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
   }, []);
   if (isLoading) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(LoadingScreen, {});
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
       className: "relative min-h-screen overflow-x-hidden",
-      style: { background: "#0a0a0a", color: "#e8e4de" },
+      style: { background: "#0a0a0a", color: "#e8e4de", borderRadius: 0 },
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(Starfield, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsx(FilmGrain, {}),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(CursorRadar, {}),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(HUDFrame, { isMenuOpen, setIsMenuOpen }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(MenuOverlay, { isOpen: isMenuOpen, setIsMenuOpen }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(NavBar, { scrolled }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { id: "top", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(Hero, {}),
@@ -19922,7 +19395,7 @@ function App() {
         ] })
       ]
     }
-  ) });
+  );
 }
 BigInt.prototype.toJSON = function() {
   return this.toString();

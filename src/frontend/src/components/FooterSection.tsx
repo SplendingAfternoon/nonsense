@@ -2,21 +2,21 @@ export default function FooterSection() {
   return (
     <footer
       data-ocid="footer.section"
+      className="text-center py-8 px-8"
       style={{
-        textAlign: "center",
-        padding: "2rem",
         borderTop: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <span
         style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
           fontSize: "11px",
-          color: "rgba(232,228,222,0.4)",
-          letterSpacing: "0.05em",
+          color: "#7a7570",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
         }}
       >
-        {"SYS.VER 4.0  //  LAT: 51.507°  //  STATUS: SECURE."}
+        {"SYS.VER 4.0  //  LAT: 51.507\u00b0  //  STATUS: SECURE."}
       </span>
     </footer>
   );

@@ -12,7 +12,7 @@ interface GlitchTextProps {
 export default function GlitchText({
   text,
   className = "",
-  durationMs = 180,
+  durationMs = 200,
 }: GlitchTextProps) {
   const spanRef = useRef<HTMLSpanElement>(null);
   const hasRunRef = useRef(false);
@@ -66,7 +66,9 @@ export default function GlitchText({
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [text, durationMs]);
 
   return (

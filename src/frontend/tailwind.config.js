@@ -63,9 +63,10 @@ export default {
                 'dark-surface': '#111111',
             },
             borderRadius: {
-                lg: 'var(--radius)',
-                md: 'calc(var(--radius) - 2px)',
-                sm: 'calc(var(--radius) - 4px)'
+                lg: '0',
+                md: '0',
+                sm: '0',
+                DEFAULT: '0',
             },
             boxShadow: {
                 xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
@@ -103,7 +104,7 @@ export default {
                 wider: '0.1em',
                 widest: '0.15em',
             },
-            /* Global line height: 1.6 */
+            /* Global line height */
             lineHeight: {
                 none: '1',
                 tight: '1.4',

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 const smoothScrollTo = (id: string) => {
   const prefersReduced = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
@@ -7,19 +9,43 @@ const smoothScrollTo = (id: string) => {
 };
 
 export default function CTASection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            observer.disconnect();
+          }
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="cta"
+      ref={sectionRef}
       data-ocid="cta.section"
-      style={{ padding: "8rem 2rem", textAlign: "center" }}
+      className="py-32 px-8 text-center"
+      style={{
+        opacity: 0,
+        transition: "opacity 400ms ease-out",
+        willChange: "opacity",
+      }}
     >
       <p
+        className="font-serif text-[#e8e4de] mx-auto mb-10 text-left"
         style={{
-          fontFamily: "'Cormorant Garamond', serif",
           fontSize: "clamp(22px, 3vw, 28px)",
-          color: "#e8e4de",
           maxWidth: "600px",
-          margin: "0 auto 2.5rem auto",
           lineHeight: "1.4",
           fontStyle: "italic",
           letterSpacing: "0.02em",
@@ -33,15 +59,16 @@ export default function CTASection() {
         type="button"
         data-ocid="cta.primary_button"
         onClick={() => smoothScrollTo("products")}
+        className="uppercase"
         style={{
           border: "1px solid #9e1a1a",
           color: "#9e1a1a",
           background: "transparent",
           padding: "14px 40px",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: "14px",
+          minHeight: "44px",
+          fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+          fontSize: "12px",
           letterSpacing: "0.1em",
-          textTransform: "uppercase",
           cursor: "pointer",
           transition: "background 200ms ease, color 200ms ease",
         }}
